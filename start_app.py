@@ -5,6 +5,8 @@ import logging
 
 from cocoavlc import AppVLC
 
+# pylint: disable=invalid-name
+
 logger = logging.getLogger(__name__)
 
 

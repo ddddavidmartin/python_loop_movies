@@ -5,6 +5,8 @@ import subprocess
 import sys
 import time
 
+# pylint: disable=invalid-name
+
 logger = logging.getLogger(__name__)
 
 
