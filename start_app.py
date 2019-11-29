@@ -21,11 +21,12 @@ def main():
     """Entry point for our simple vlc player
     """
     parser = argparse.ArgumentParser(description="Play a movie")
+    parser.add_argument('movie', type=str, help="The movie to play.")
     parser.add_argument('--set_time', type=int, default=0,
                         help="Time to start the movie at.")
     args = parser.parse_args()
 
-    run_video("movie.mp4", args.set_time)
+    run_video(args.movie, args.set_time)
 
 
 if __name__ == "__main__":
