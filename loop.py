@@ -9,19 +9,19 @@ import time
 
 import vlc
 
-# pylint: disable=invalid-name, too-few-public-methods
+# pylint: disable=invalid-name, too-few-public-methods, line-too-long
 
 logger = logging.getLogger(__name__)
 
 
 class Movie():
     """Container class for movie information"""
-    def __init__(self, path, length):
+    def __init__(self, path, length, time_played):
         self.path = path
         self.length = length
-        self.time_played = 0
+        self.time_played = time_played
 
-def _parse_movie_infos(directory):
+def _parse_movie_infos(directory, start_time):
     """Parse all necessary information about the movies in the given directory."""
     instance = vlc.Instance()
     movies = {}
@@ -33,7 +33,7 @@ def _parse_movie_infos(directory):
             media.parse()
             length = media.get_duration()
             logger.info("Length: %s ms, %s minutes", length, length // 1000 // 60)
-            movies[file_path] = Movie(file_path, length)
+            movies[file_path] = Movie(file_path, length, start_time * 1000)
     return movies
 
 
@@ -44,10 +44,13 @@ def main():
     parser.add_argument('directory', type=str, help="The directory containing the movie files.")
     parser.add_argument('--loop_time', type=int, default=180,
                         help="Time in seconds that each movie is shown for at a time.")
+    parser.add_argument('--start_time', type=int, default=0,
+                        help="Set from when to resume playing in seconds.")
     options = parser.parse_args()
 
-    movies = _parse_movie_infos(options.directory)
+    movies = _parse_movie_infos(options.directory, options.start_time)
     while True:
+        movie = None
         for movie in list(movies.values()):
             loop_time = options.loop_time
             loop_time_ms = loop_time * 1000  # play time in VLC is in milliseconds
@@ -67,6 +70,10 @@ def main():
             time.sleep(options.loop_time)
             process.terminate()
             movie.time_played += loop_time_ms
+
+        if movie:
+            elapsed_time = movie.time_played // 1000
+            logger.info("Elapsed time: %s second(s), %s minute(s)", elapsed_time, elapsed_time // 60)
 
         if not movies:
             break
