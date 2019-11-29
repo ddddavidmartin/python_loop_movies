@@ -12,7 +12,7 @@ def main():
     """Entry point for our simple vlc player
     """
 
-    args = ["python3", "start_app.py"]
+    args = ["python3", "start_app.py", "--set_time", "600000"]
     process = subprocess.Popen(args, stdout=sys.stdout, stderr=subprocess.STDOUT)
 
     logger.info("Letting it run for a bit")

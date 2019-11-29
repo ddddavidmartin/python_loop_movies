@@ -119,16 +119,18 @@ class AppVLC(App):
                        logostr='',       # vlc.VideoLogoOption
                        marquee=False,    # vlc.VideoMarqueeOption
                        raiser=False,     # re-raise errors
-                       title='AppVLC'):  # window title
+                       title='AppVLC',   # window title
+                       set_time=None):   # time to start the video at
         super(AppVLC, self).__init__(raiser=raiser, title=title)
-        self.adjustr = adjustr
-        self.logostr = logostr
-        self.marquee = marquee
-        self.media   = None
-        self.player  = vlc.MediaPlayer()
-        self.raiser  = raiser
-        self.Toggle  = Item('Play', self.menuToggle_, key='p', ctrl=True)
-        self.video   = video
+        self.adjustr  = adjustr
+        self.logostr  = logostr
+        self.marquee  = marquee
+        self.media    = None
+        self.player   = vlc.MediaPlayer()
+        self.raiser   = raiser
+        self.Toggle   = Item('Play', self.menuToggle_, key='p', ctrl=True)
+        self.video    = video
+        self.set_time = set_time
 
     def appLaunched_(self, app):
         super(AppVLC, self).appLaunched_(app)
@@ -185,6 +187,8 @@ class AppVLC(App):
             self.append(menu)
 
         self.menuPlay_(None)
+        if self.set_time:
+            self.player.set_time(self.set_time)
         self.window.front()
         self._resize(True)
         self.window.full(True)
