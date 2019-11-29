@@ -187,6 +187,7 @@ class AppVLC(App):
         self.menuPlay_(None)
         self.window.front()
         self._resize(True)
+        self.window.full(True)
 
     def menuBrighter_(self, item):
         self._brightness(item, +0.1)
