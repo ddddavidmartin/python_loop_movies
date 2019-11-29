@@ -64,7 +64,7 @@ def main():
                 loop_time_ms = movie.length - movie.time_played
                 loop_time = loop_time_ms // 1000
 
-            args = ["python3", "start_app.py", movie.path, "--set_time", str(movie.time_played)]
+            args = ["python3", "play_single_movie.py", movie.path, "--set_time", str(movie.time_played)]
             process = subprocess.Popen(args, stdout=sys.stdout, stderr=subprocess.STDOUT)
             logger.info("Letting '%s' run for %s second(s)", movie.path, loop_time)
             time.sleep(options.loop_time)
