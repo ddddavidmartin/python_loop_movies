@@ -2,13 +2,38 @@
 
 import argparse
 import logging
+import os
 import subprocess
 import sys
 import time
 
-# pylint: disable=invalid-name
+import vlc
+
+# pylint: disable=invalid-name, too-few-public-methods
 
 logger = logging.getLogger(__name__)
+
+
+class Movie():
+    """Container class for movie information"""
+    def __init__(self, path, length):
+        self.path = path
+        self.length = length
+        self.time_played = 0
+
+def _parse_movie_infos(directory):
+    """Parse all necessary information about the movies in the given directory."""
+    instance = vlc.Instance()
+    movies = {}
+    for root, _, files in os.walk(directory):
+        for f in files:
+            logger.info("Parsing '%s'", os.path.join(root, f))
+            file_path = os.path.join(root, f)
+            media = instance.media_new(file_path)
+            media.parse()
+            length = media.get_duration()
+            movies[f] = Movie(file_path, length)
+    return movies
 
 
 def main():
@@ -20,13 +45,16 @@ def main():
                         help="Time in seconds that each movie is shown for at a time.")
     options = parser.parse_args()
 
-    args = ["python3", "start_app.py", "movies/movie.mp4", "--set_time", "600000"]
-    process = subprocess.Popen(args, stdout=sys.stdout, stderr=subprocess.STDOUT)
-
-    logger.info("Letting it run for %s second(s)", options.loop_time)
-    time.sleep(options.loop_time)
-    process.terminate()
-    logger.info("Done")
+    movies = _parse_movie_infos(options.directory)
+    while True:
+        for movie in movies.values():
+            args = ["python3", "start_app.py", movie.path, "--set_time", str(movie.time_played)]
+            process = subprocess.Popen(args, stdout=sys.stdout, stderr=subprocess.STDOUT)
+            logger.info("Letting '%s' run for %s second(s)", movie.path, options.loop_time)
+            time.sleep(options.loop_time)
+            process.terminate()
+            movie.time_played += options.loop_time * 1000  # play time in VLC is in ms
+            logger.info("Done")
 
 
 if __name__ == "__main__":
