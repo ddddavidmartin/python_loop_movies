@@ -32,7 +32,8 @@ def _parse_movie_infos(directory):
             media = instance.media_new(file_path)
             media.parse()
             length = media.get_duration()
-            movies[f] = Movie(file_path, length)
+            logger.info("Length: %s ms, %s minutes", length, length // 1000 // 60)
+            movies[file_path] = Movie(file_path, length)
     return movies
 
 
@@ -47,14 +48,29 @@ def main():
 
     movies = _parse_movie_infos(options.directory)
     while True:
-        for movie in movies.values():
+        for movie in list(movies.values()):
+            loop_time = options.loop_time
+            loop_time_ms = loop_time * 1000  # play time in VLC is in milliseconds
+
+            if movie.time_played >= movie.length:
+                logger.info("Finished '%s'.", movie.path)
+                del movies[movie.path]
+                continue
+            elif movie.time_played + loop_time_ms > movie.length:
+                logger.info("Less than loop time left. Playing the remainder.")
+                loop_time_ms = movie.length - movie.time_played
+                loop_time = loop_time_ms // 1000
+
             args = ["python3", "start_app.py", movie.path, "--set_time", str(movie.time_played)]
             process = subprocess.Popen(args, stdout=sys.stdout, stderr=subprocess.STDOUT)
-            logger.info("Letting '%s' run for %s second(s)", movie.path, options.loop_time)
+            logger.info("Letting '%s' run for %s second(s)", movie.path, loop_time)
             time.sleep(options.loop_time)
             process.terminate()
-            movie.time_played += options.loop_time * 1000  # play time in VLC is in ms
-            logger.info("Done")
+            movie.time_played += loop_time_ms
+
+        if not movies:
+            break
+    logger.info("Done")
 
 
 if __name__ == "__main__":
