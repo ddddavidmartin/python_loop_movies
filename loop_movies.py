@@ -51,6 +51,7 @@ def main():
     movies = _parse_movie_infos(options.directory, options.start_time)
     while True:
         movie = None
+        previous_process = None
         for movie in list(movies.values()):
             loop_time = options.loop_time
             loop_time_ms = loop_time * 1000  # play time in VLC is in milliseconds
@@ -65,10 +66,15 @@ def main():
                 loop_time = loop_time_ms // 1000
 
             args = ["python3", "play_single_movie.py", movie.path, "--set_time", str(movie.time_played)]
+            # Start the next movie before terminating the current one to make the
+            # transition less jarring.
             process = subprocess.Popen(args, stdout=sys.stdout, stderr=subprocess.STDOUT)
+            time.sleep(2)
+            if previous_process:
+                previous_process.terminate()
+            previous_process = process
             logger.info("Letting '%s' run for %s second(s)", movie.path, loop_time)
             time.sleep(options.loop_time)
-            process.terminate()
             movie.time_played += loop_time_ms
 
         if movie:
