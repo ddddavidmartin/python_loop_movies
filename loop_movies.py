@@ -73,7 +73,7 @@ def main():
             time.sleep(2)
             if previous_process:
                 logger.info("Stopping previous movie.")
-                previous_process.terminate()
+                previous_process.kill()
             previous_process = process
             logger.info("Letting '%s' run for %s second(s)", movie.path, loop_time)
             time.sleep(options.loop_time)
