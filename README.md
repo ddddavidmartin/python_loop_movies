@@ -25,7 +25,7 @@ $ python loop_movies.py movies --loop_time 300
 ## Requirements
 
 - Python 3
-- pip3 install python-vlc python-cocoa
+- `pip3 install python-vlc python-cocoa`
 - vlc
 
 
