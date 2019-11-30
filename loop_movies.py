@@ -68,9 +68,11 @@ def main():
             args = ["python3", "play_single_movie.py", movie.path, "--set_time", str(movie.time_played)]
             # Start the next movie before terminating the current one to make the
             # transition less jarring.
+            logger.info("Starting '%s'.", movie.path)
             process = subprocess.Popen(args, stdout=sys.stdout, stderr=subprocess.STDOUT)
             time.sleep(2)
             if previous_process:
+                logger.info("Stopping previous movie.")
                 previous_process.terminate()
             previous_process = process
             logger.info("Letting '%s' run for %s second(s)", movie.path, loop_time)
